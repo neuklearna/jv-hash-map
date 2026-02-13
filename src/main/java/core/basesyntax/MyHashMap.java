@@ -51,28 +51,6 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
         return size;
     }
 
-    @Override
-    public V remove(K key) {
-        int index = getBucketIndex(key);
-        Node<K, V> current = tablica[index];
-        Node<K, V> prev = null;
-
-        while (current != null) {
-            if (Objects.equals(current.getKey(), key)) {
-                if (prev == null) {
-                    tablica[index] = current.getNext();
-                } else {
-                    prev.setNext(current.getNext());
-                }
-                size--;
-                return current.getValue();
-            }
-            prev = current;
-            current = current.getNext();
-        }
-        return null;
-    }
-
     private void resize() {
         Node<K, V>[] oldTablica = tablica;
         tablica = new Node[oldTablica.length * 2];
