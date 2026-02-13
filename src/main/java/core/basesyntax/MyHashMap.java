@@ -18,33 +18,30 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
             resize();
         }
 
-        int result = getBucketIndex(key);
-        if (tablica[result] == null) {
-            tablica[result] = new Node<>(key, value, null);
-            size++;
-        } else {
-            Node<K, V> currentnode = tablica[result];
-            while (currentnode != null) {
-                if (Objects.equals(currentnode.key, key)) {
-                    currentnode.value = value;
-                    return;
-                }
-                currentnode = currentnode.next;
+        int index = getBucketIndex(key);
+        Node<K, V> current = tablica[index];
+
+        while (current != null) {
+            if (Objects.equals(current.getKey(), key)) {
+                current.setValue(value);
+                return;
             }
-            tablica[result] = new Node<>(key, value, tablica[result]);
-            size++;
+            current = current.getNext();
         }
+
+        tablica[index] = new Node<>(key, value, tablica[index]);
+        size++;
     }
 
     @Override
     public V getValue(K key) {
-        int currentNodeIndex = getBucketIndex(key);
-        Node<K, V> current = tablica[currentNodeIndex];
+        int index = getBucketIndex(key);
+        Node<K, V> current = tablica[index];
         while (current != null) {
-            if (Objects.equals(current.key, key)) {
-                return current.value;
+            if (Objects.equals(current.getKey(), key)) {
+                return current.getValue();
             }
-            current = current.next;
+            current = current.getNext();
         }
         return null;
     }
@@ -54,6 +51,28 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
         return size;
     }
 
+    @Override
+    public V remove(K key) {
+        int index = getBucketIndex(key);
+        Node<K, V> current = tablica[index];
+        Node<K, V> prev = null;
+
+        while (current != null) {
+            if (Objects.equals(current.getKey(), key)) {
+                if (prev == null) {
+                    tablica[index] = current.getNext();
+                } else {
+                    prev.setNext(current.getNext());
+                }
+                size--;
+                return current.getValue();
+            }
+            prev = current;
+            current = current.getNext();
+        }
+        return null;
+    }
+
     private void resize() {
         Node<K, V>[] oldTablica = tablica;
         tablica = new Node[oldTablica.length * 2];
@@ -61,47 +80,13 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
 
         for (Node<K, V> node : oldTablica) {
             while (node != null) {
-                put(node.key, node.value);
-                node = node.next;
+                put(node.getKey(), node.getValue());
+                node = node.getNext();
             }
         }
-    }
-
-    public V remove(K key) {
-        int result = getBucketIndex(key);
-        Node<K, V> current = tablica[result];
-        Node<K, V> prev = null;
-
-        while (current != null) {
-            if (Objects.equals(current.key, key)) {
-                if (prev == null) {
-                    tablica[result] = current.next;
-                } else {
-                    prev.next = current.next;
-                }
-                size--;
-                return current.value; // Dodano, żeby wyjść z metody z sukcesem
-            }
-            prev = current;
-            current = current.next;
-        }
-        return null;
     }
 
     private int getBucketIndex(K key) {
         return (key == null) ? 0 : Math.abs(key.hashCode() % tablica.length);
-    }
-
-    // Klasa Node, której brakowało w Twoim pliku:
-    private static class Node<K, V> {
-        private final K key;
-        private V value;
-        private Node<K, V> next;
-
-        private Node(K key, V value, Node<K, V> next) {
-            this.key = key;
-            this.value = value;
-            this.next = next;
-        }
     }
 }
