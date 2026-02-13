@@ -64,4 +64,16 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
     private int getBucketIndex(K key) {
         return (key == null) ? 0 : Math.abs(key.hashCode() % table.length);
     }
+
+    private static class Node<K, V> {
+        private final K key;
+        private V value;
+        private Node<K, V> next;
+
+        private Node(K key, V value, Node<K, V> next) {
+            this.key = key;
+            this.value = value;
+            this.next = next;
+        }
+    }
 }
